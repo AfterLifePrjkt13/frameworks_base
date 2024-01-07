@@ -197,6 +197,8 @@ import android.permission.LegacyPermissionManager;
 import android.permission.PermissionCheckerManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
+import android.pocket.IPocketService;
+import android.pocket.PocketManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
@@ -965,16 +967,14 @@ public final class SystemServiceRegistry {
                 return new TvInteractiveAppManager(service, ctx.getUserId());
             }});
 
-        if (SystemProperties.getBoolean("persist.sys.service.enable_oplus_linearmotor", false)) {
-                registerService(Context.LINEARMOTOR_VIBRATOR_SERVICE, LinearmotorVibrator.class,
-                        new CachedServiceFetcher<LinearmotorVibrator>() {
-                    @Override
-                public LinearmotorVibrator createService(ContextImpl ctx) {
-                    IBinder binder = ServiceManager.getService(Context.LINEARMOTOR_VIBRATOR_SERVICE);
-                    ILinearmotorVibratorService service = ILinearmotorVibratorService.Stub.asInterface(binder);
-                    return new LinearmotorVibrator(ctx.getOuterContext(), service);
-                }});
-            }
+        registerService(Context.POCKET_SERVICE, PocketManager.class,
+                new CachedServiceFetcher<PocketManager>() {
+            @Override
+            public PocketManager createService(ContextImpl ctx) {
+                IBinder binder = ServiceManager.getService(Context.POCKET_SERVICE);
+                IPocketService service = IPocketService.Stub.asInterface(binder);
+                return new PocketManager(ctx.getOuterContext(), service);
+            }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
                 new CachedServiceFetcher<TvInputManager>() {

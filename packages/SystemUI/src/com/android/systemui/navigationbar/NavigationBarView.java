@@ -34,11 +34,17 @@ import android.annotation.DrawableRes;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -149,6 +155,7 @@ import java.util.function.Consumer;
     private boolean mInCarMode = false;
     private boolean mDockedStackExists;
     private boolean mScreenOn = true;
+    private boolean mIsUserEnabled = true;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private final ContextualButtonGroup mContextualButtonGroup;
@@ -610,8 +617,7 @@ import java.util.function.Consumer;
         if (!visible) {
             mTransitionListener.onBackAltCleared();
         }
-        mImeVisible = visible;
-        mRotationButtonController.getRotationButton().setCanShowRotationButton(!visible);
+        mRotationButtonController.getRotationButton().setCanShowRotationButton(!visible && mIsUserEnabled);
     }
 
     void setDisabledFlags(int disabledFlags, SysUiState sysUiState) {
@@ -1140,6 +1146,9 @@ import java.util.function.Consumer;
         }
 
         updateNavButtonIcons();
+
+        mCustomSettingsObserver.observe();
+        mCustomSettingsObserver.update();
     }
 
     @Override
@@ -1152,6 +1161,7 @@ import java.util.function.Consumer;
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
         }
+        mCustomSettingsObserver.stop();
     }
 
     @Override
@@ -1270,5 +1280,38 @@ import java.util.function.Consumer;
 
     interface UpdateActiveTouchRegionsCallback {
         void update();
+    }
+
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver();
+    private class CustomSettingsObserver extends ContentObserver {
+        CustomSettingsObserver() {
+            super(new Handler(Looper.getMainLooper()));
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ENABLE_FLOATING_ROTATION_BUTTON),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        void stop() {
+            mContext.getContentResolver().unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            update();
+        }
+
+        void update() {
+            boolean enabled = Settings.System.getInt(getContext().getContentResolver(),
+                    Settings.System.ENABLE_FLOATING_ROTATION_BUTTON, 1) == 1;
+            if (mIsUserEnabled != enabled) {
+                mIsUserEnabled = enabled;
+                if (mRotationButtonController == null) return;
+                mRotationButtonController.getRotationButton().setCanShowRotationButton(
+                        mIsUserEnabled);
+            }
+        }
     }
 }

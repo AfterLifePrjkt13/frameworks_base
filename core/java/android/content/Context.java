@@ -6062,22 +6062,14 @@ public abstract class Context {
     public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
 
     /**
-     * {@link AppLockManager}.
-     *
-     * @see #getSystemService(String)
-     * @hide
-     */
-    public static final String APP_LOCK_SERVICE = "app_lock";
-
-    /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link com.oplus.os.LinearmotorVibrator} for accessing linear motor vibrator state.
+     * {@link android.os.PocketManager} for accessing and listening to device pocket state.
      *
      * @hide
      * @see #getSystemService
-     * @see com.oplus.os.LinearmotorVibrator
+     * @see android.os.PocketManager
      */
-    public static final String LINEARMOTOR_VIBRATOR_SERVICE = "linearmotor";
+    public static final String POCKET_SERVICE = "pocket";
 
     /**
      * Determine whether the given permission is allowed for a particular

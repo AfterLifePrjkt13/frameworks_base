@@ -112,7 +112,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private static final boolean DEBUG_DISABLE_SCREEN_DECORATIONS =
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
-            SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
+            SystemProperties.getBoolean("debug.screenshot_rounded_corners", true);
     private static final boolean VERBOSE = false;
     static final boolean DEBUG_COLOR = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
 
